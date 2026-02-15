@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Shello Dashboard
 
-## Getting Started
+A web dashboard to monitor and connect to all your [Shello](https://github.com/prkoundal/vpnBypass)-configured servers from one place.
 
-First, run the development server:
+See which servers are online, click to open a terminal — all from a single page.
+
+## Setup
+
+**Prerequisites:** Node.js 18+
+
+```bash
+git clone https://github.com/prkoundal/shello-dashboard.git
+cd shello-dashboard
+npm install
+```
+
+Edit `servers.json` with your servers:
+
+```json
+{
+  "servers": [
+    {
+      "id": "prod-web",
+      "name": "Production Web Server",
+      "url": "https://terminal.yourdomain.com",
+      "group": "production",
+      "description": "Main web server"
+    }
+  ]
+}
+```
+
+Then run:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## servers.json Format
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Field | Required | Description |
+|---|---|---|
+| `id` | Yes | Unique identifier |
+| `name` | Yes | Display name |
+| `url` | Yes | Full ttyd URL (the one from Shello setup) |
+| `group` | Yes | Group label (used for filtering) |
+| `description` | No | Short description shown on card |
 
-## Learn More
+## How Status Works
 
-To learn more about Next.js, take a look at the following resources:
+The dashboard sends a `HEAD` request to each server's URL every 30 seconds. Since ttyd uses basic auth, a `401` response means the server is **online** (reachable, just needs credentials). A timeout or error means **offline**.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deploy
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Vercel (easiest):**
+1. Push to GitHub
+2. Import in [Vercel](https://vercel.com/new)
+3. Deploy — done
 
-## Deploy on Vercel
+**Self-hosted:**
+```bash
+npm run build
+npm start
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT

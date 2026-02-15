@@ -1,0 +1,18 @@
+{
+  "servers": [
+    {
+      "id": "prod-web",
+      "name": "Production Web Server",
+      "url": "https://terminal.example.com",
+      "group": "production",
+      "description": "Main web server"
+    },
+    {
+      "id": "staging",
+      "name": "Staging Server",
+      "url": "https://staging.example.com",
+      "group": "staging",
+      "description": "Staging environment"
+    }
+  ]
+}
