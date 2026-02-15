@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Shello Dashboard",
+  title: "Shello Hub",
   description: "Monitor and connect to all your servers from one place",
 };
 
