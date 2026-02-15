@@ -1,20 +1,31 @@
 # Shello Dashboard
 
-A web dashboard to monitor and connect to all your [Shello](https://github.com/prkoundal/vpnBypass)-configured servers from one place.
+A web dashboard to monitor and connect to all your [Shello](https://github.com/ParasKoundal/Shello)-configured servers from one place.
 
 See which servers are online, click to open a terminal — all from a single page.
 
-## Setup
+## Features
+
+- Live online/offline status for each server (polls every 30s)
+- Click to open any server's terminal in a new tab
+- Search across server names, groups, and descriptions
+- Filter by server group (production, staging, personal, etc.)
+- Dark mode by default with light mode toggle
+- Responsive — works on mobile, tablet, and desktop
+- Copy server URL to clipboard
+
+## Quick Start (Local)
 
 **Prerequisites:** Node.js 18+
 
 ```bash
-git clone https://github.com/prkoundal/shello-dashboard.git
+git clone https://github.com/ParasKoundal/shello-dashboard.git
 cd shello-dashboard
+cp servers.example.json servers.json
 npm install
 ```
 
-Edit `servers.json` with your servers:
+Edit `servers.json` with your actual servers:
 
 ```json
 {
@@ -25,6 +36,13 @@ Edit `servers.json` with your servers:
       "url": "https://terminal.yourdomain.com",
       "group": "production",
       "description": "Main web server"
+    },
+    {
+      "id": "homelab",
+      "name": "Home Lab",
+      "url": "https://lab.yourdomain.com",
+      "group": "personal",
+      "description": "Raspberry Pi cluster"
     }
   ]
 }
@@ -42,28 +60,62 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Field | Required | Description |
 |---|---|---|
-| `id` | Yes | Unique identifier |
-| `name` | Yes | Display name |
-| `url` | Yes | Full ttyd URL (the one from Shello setup) |
-| `group` | Yes | Group label (used for filtering) |
-| `description` | No | Short description shown on card |
+| `id` | Yes | Unique identifier for this server |
+| `name` | Yes | Display name shown on the card |
+| `url` | Yes | Full ttyd URL (the one from your Shello setup) |
+| `group` | Yes | Group label — used for filtering (e.g., "production", "personal") |
+| `description` | No | Short description shown below the name |
 
 ## How Status Works
 
-The dashboard sends a `HEAD` request to each server's URL every 30 seconds. Since ttyd uses basic auth, a `401` response means the server is **online** (reachable, just needs credentials). A timeout or error means **offline**.
+The dashboard's API route sends a `HEAD` request to each server's URL every 30 seconds. Since ttyd uses basic auth, a `401 Unauthorized` response means the server is **online** (reachable, just needs credentials). A timeout or network error means **offline**.
 
-## Deploy
+Health checks happen server-side (in Next.js API routes), so there are no CORS issues.
 
-**Vercel (easiest):**
-1. Push to GitHub
-2. Import in [Vercel](https://vercel.com/new)
-3. Deploy — done
+## Deploy to Your Own Domain
 
-**Self-hosted:**
+### Step 1: Push to GitHub
+
+```bash
+git remote add origin git@github.com:YourUsername/shello-dashboard.git
+git push -u origin main
+```
+
+### Step 2: Deploy on Vercel
+
+1. Go to [vercel.com/new](https://vercel.com/new) and import your repo
+2. Add an environment variable before deploying:
+   - **Name:** `SERVERS_CONFIG`
+   - **Value:** the contents of your `servers.json` (as a single line of JSON)
+
+   Example:
+   ```
+   {"servers":[{"id":"prod","name":"Production","url":"https://terminal.yourdomain.com","group":"production","description":"Main server"}]}
+   ```
+
+   This is needed because `servers.json` is gitignored (keeps your server URLs private). In production, the app reads from this env var instead.
+
+3. Click **Deploy**
+
+### Step 3: Custom domain
+
+1. In Vercel → your project → **Settings** → **Domains** → add `dashboard.yourdomain.com`
+2. In your domain registrar (Namecheap, GoDaddy, etc.) → DNS settings:
+   - Add a **CNAME Record**: Host = `dashboard`, Value = `cname.vercel-dns.com`
+3. Wait 5–15 minutes for DNS propagation — Vercel auto-provisions SSL
+
+### Self-hosted alternative
+
 ```bash
 npm run build
 npm start
 ```
+
+Place your `servers.json` in the project root, or set the `SERVERS_CONFIG` environment variable.
+
+## Related
+
+- **[Shello](https://github.com/ParasKoundal/Shello)** — the setup script that installs ttyd + Cloudflare Tunnel on each server. Run it on every server you want to appear in this dashboard.
 
 ## License
 
